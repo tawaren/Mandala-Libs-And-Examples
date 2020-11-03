@@ -1,0 +1,53 @@
+import std.Token._
+import std.Token.mint as tokenMint
+import std.Option._
+import std.SubjectManager._
+import std.EdDsaIssuer._
+import std.EdDsaIssuer
+import std.core.sys.EdDsa
+import std.core.sys.Sys._
+import std.core.IntU128.U128
+import std.SubjectLock._
+import std.core.Equal._
+
+module UzhToken {
+    //Marker type for our token
+    local data UZH
+
+    //Note: 0x0000000000000000000000000000000000000000000000000000000000000000 is a placeholder
+    //Replace 0x00..00 with a Pk where you have access to the corresponding SK
+    global function ownerPk() = 0x0000000000000000000000000000000000000000000000000000000000000000:EdDsa.Pk
+    global function ownerSubject() = subjectFor(ownerPk()).subject
+
+    global transactional function mintUZH(amount:U128, auth:AuthenticationToken):Token[UZH] {
+        match ownerSubject() == auth.subject with
+         | False => rollback
+         | True => tokenMint[UZH](amount)
+    }
+
+    global function safeMintUZH(amount:U128, auth:AuthenticationToken):Option[Token[UZH]] {
+        try mintUZH(amount,auth) with
+         | success(tok) => Option#Some(tok)
+         | failure => Option#None
+    }
+
+}
+
+transactional transaction MintUZH(amount:U128, to:EdDsa.Pk, context consume ctx:Context, sigMinter:EdDsa.Sig):(coins:Entry[Locked[Token[UzhToken.UZH]]]) {
+    let auth = EdDsaIssuer.authenticateWith(UzhToken.ownerPk(), sigMinter) in
+    let newTokens = UzhToken.mintUZH(amount, auth) in
+    let (storageLoc, _) = uniqueID(ctx) in
+    lockEntry(subjectFor(to).subject,storageLoc,newTokens)
+}
+
+
+transactional transaction TransferUZH(consume coins:Entry[Locked[Token[UzhToken.UZH]]], pkFrom:EdDsa.Pk, amount:U128, pkTo:EdDsa.Pk, context consume ctx:Context, sigSender:EdDsa.Sig):
+                                  (coinsChange:Entry[Locked[Token[UzhToken.UZH]]], coinsSent:Entry[Locked[Token[UzhToken.UZH]]]) {
+  let auth = EdDsaIssuer.authenticateWith( pkFrom, sigSender) in
+  let (senderLoc, allTokens) = unlockEntry(coins, auth) in
+  let (rem,send) = split(allTokens, amount) in
+  let (receiverLoc, _) = uniqueID(ctx) in
+  let changeEntry = lockEntry(subjectFor(pkFrom).subject,senderLoc,rem) in
+  let receiverEntry = lockEntry(subjectFor(pkTo).subject,receiverLoc,send) in
+  (changeEntry, receiverEntry)
+}

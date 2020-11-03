@@ -1,0 +1,32 @@
+module Bool {
+    global primitive data Bool {
+        False
+        True
+    }
+
+    global function not(b1:Bool):(res:Bool) {
+         match b1 with
+             | False => Bool#True
+             | True => Bool#False
+    }
+
+    global function and(b1:Bool, b2:Bool):(res:Bool) {
+         match b1 with
+             | False => Bool#False
+             | True => b2
+    }
+
+    global function or(b1:Bool, b2:Bool):(res:Bool) {
+         match b1 with
+             | False => b2
+             | True => Bool#True
+    }
+
+    global function xor(b1:Bool, b2:Bool):(res:Bool) {
+         match b1 with
+             | False => b2
+             | True => not(b2)
+    }
+
+    global function eq(b1:Bool, b2:Bool):(res:Bool) = not(xor(b1,b2))
+}

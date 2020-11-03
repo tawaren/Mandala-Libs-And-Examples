@@ -1,0 +1,30 @@
+import IntU64.U64
+import IntI64.I64
+import Data._
+import Ids._
+
+system(12) module Sys {
+   //Note this is temporary to prevent nesting an Entry in a Entry
+   // This is no problem, as the top marker indicates special treatment by runtime anyway
+   // Meaning the runtime can still persist it
+   // in fact the runtime does ignore the persisted capability all together and only looks for tops
+
+   guarded[T] top temporary data Entry[persisted T](id:PrivateId,val:T)
+
+   local top temporary affine data Context(txtId:PrivateId, bundleHash:Data20, blockNo:U64, sectionNo:U8, txNo:U8, ctr:U64)
+
+   global function txtId(ctx:Context):(txtHash:PublicId) = privateToPublic(ctx.txtId)
+   global function bundleHash(ctx:Context):(txtHash:Data20) = ctx.bundleHash
+   global function blockNo(ctx:Context):(blockNo:U64) = ctx.blockNo
+   global function sectionNo(ctx:Context):(sectionNo:U8) = ctx.sectionNo
+   global function txNo(ctx:Context):(txNo:U8) = ctx.txNo
+
+   //Todo: can we make non transactional:
+   //      have unsave abort??
+   global transactional function uniqueID(consume ctx:Context):(id:PrivateId, ctxOut:Context) {
+     let (txtId, bundleHash, blockNo, sectionNo, txNo, ctr)@ctx in (
+       derivePrivateId8(txtId, IntU64.toData(ctr)),
+       Context#(txtId, bundleHash, blockNo, sectionNo, txNo, IntU64.add(ctr,1))
+     )
+   }
+}

@@ -1,0 +1,53 @@
+import std.Asset._
+import std.Asset.mint as assetMint
+import std.Option._
+import std.SubjectManager._
+import std.EdDsaIssuer._
+import std.EdDsaIssuer
+import std.core.sys.EdDsa
+import std.core.sys.Sys._
+import std.core.Data20.Data20
+import std.SubjectLock._
+import std.core.Equal._
+import std.core.Id
+
+//Todo: do we even need the Asset Wrapper Class??
+//      if we keep it we should move the id there
+module MandalaKitten {
+    //Data Type for Our Asset
+    local data Kitten(dna:Data20)
+
+    //Note: 0x0000000000000000000000000000000000000000000000000000000000000000 is a placeholder
+    //Replace 0x00..00 with a Pk where you have access to the corresponding SK
+    global function ownerPk() = 0x0000000000000000000000000000000000000000000000000000000000000000:EdDsa.Pk
+    global function ownerSubject() = subjectFor(ownerPk()).subject
+
+    global transactional function mintKitten(dna:Data20, auth:AuthenticationToken, implicit context consume ctx:Context):(Asset[Kitten],Context) {
+        match ownerSubject() == auth.subject with
+         | False => rollback
+         | True => assetMint(Kitten#(dna))
+    }
+
+    global function safeMintKitten(dna:Data20, auth:AuthenticationToken, implicit context consume ctx:Context):(Option[Asset[Kitten]],Context) {
+        try mintKitten(dna,auth,!ctx) with
+         | success(ass, newCtx) => (Option#Some(ass),newCtx)
+         | failure(oldCtx) => (Option#None,oldCtx)
+    }
+}
+
+
+transactional transaction MintKitten(dna:Data20, to:EdDsa.Pk, context consume ctx:Context, sigMinter:EdDsa.Sig):(coins:Entry[Locked[Asset[MandalaKitten.Kitten]]]) {
+    let auth = EdDsaIssuer.authenticateWith(UzhToken.ownerPk(), sigMinter) in
+    let (newAsset, newCtx) = MandalaKitten.mintKitten(dna, auth) in
+    let (storageLoc, _) = uniqueID(newCtx) in
+    lockEntry(subjectFor(to).subject,storageLoc,newAsset)
+}
+
+
+transactional transaction TransferKitten(consume kittenEntry:Entry[Locked[Asset[MandalaKitten.Kitten]]], pkFrom:EdDsa.Pk, pkTo:EdDsa.Pk, context consume ctx:Context, sigSender:EdDsa.Sig):
+                                  (kittenSent:Entry[Locked[Asset[MandalaKitten.Kitten]]]) {
+  let auth = EdDsaIssuer.authenticateWith(pkFrom, sigSender) in
+  let (senderLoc, kitten) = unlockEntry(kittenEntry, auth) in
+  let (receiverLoc, newCtx) = uniqueID(ctx) in
+  lockEntry(subjectFor(pkTo).subject,receiverLoc,kitten)
+}

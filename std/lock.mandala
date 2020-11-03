@@ -1,0 +1,17 @@
+import Either.Either
+import core.sys.Sys.Entry
+import core.Id
+
+//Todo: A dream in a later version would be higher order types so that we can write
+//      lock[T](owner:O, consume val:T):L[T]
+class Lock[O,T,K,L] {
+    guarded[L](define) function lock(owner:O, consume val:T):L
+    guarded[L](define) transactional function unlock(consume locked:L, key:K):T
+    guarded[L](define) function safeUnlock(consume locked:L, key:K):Either[T, L]
+}
+
+class EntryLock[O,persisted T,K,persisted L] {
+    guarded[L](define) function lockEntry(owner:O, id:Id.Private, consume val:T):Entry[L]
+    guarded[L](define) transactional function unlockEntry(consume locked:Entry[L], key:K):(id:Id.Private, val:T)
+    //Todo: Add safe variant that returns a tuple
+}
