@@ -22,32 +22,30 @@ module MandalaKitten {
     global function ownerPk() = 0x0000000000000000000000000000000000000000000000000000000000000000:EdDsa.Pk
     global function ownerSubject() = subjectFor(ownerPk()).subject
 
-    global transactional function mintKitten(dna:Data20, auth:AuthenticationToken, implicit context consume ctx:Context):(Asset[Kitten],Context) {
+    global transactional function mintKitten(dna:Data20, auth:AuthenticationToken, implicit context consume gen:IdGenerator):(Asset[Kitten],IdGenerator) {
         match ownerSubject() == auth.subject with
          | False => rollback
          | True => assetMint(Kitten#(dna))
     }
 
-    global function safeMintKitten(dna:Data20, auth:AuthenticationToken, implicit context consume ctx:Context):(Option[Asset[Kitten]],Context) {
-        try mintKitten(dna,auth,!ctx) with
+    global function safeMintKitten(dna:Data20, auth:AuthenticationToken, implicit context consume gen:IdGenerator):(Option[Asset[Kitten]],IdGenerator) {
+        try mintKitten(dna,auth,!gen) with
          | success(ass, newCtx) => (Option#Some(ass),newCtx)
          | failure(oldCtx) => (Option#None,oldCtx)
     }
 }
 
 
-transactional transaction MintKitten(dna:Data20, to:EdDsa.Pk, context consume ctx:Context, sigMinter:EdDsa.Sig):(coins:Entry[Locked[Asset[MandalaKitten.Kitten]]]) {
-    let auth = EdDsaIssuer.authenticateWith(UzhToken.ownerPk(), sigMinter) in
-    let (newAsset, newCtx) = MandalaKitten.mintKitten(dna, auth) in
-    let (storageLoc, _) = uniqueID(newCtx) in
-    lockEntry(subjectFor(to).subject,storageLoc,newAsset)
+transactional transaction MintKitten(dna:Data20, to:Subject, auth:AuthenticationToken, context consume gen:IdGenerator):(coins:Entry[Locked[Asset[MandalaKitten.Kitten]]]) {
+    let (newAsset, newGen) = MandalaKitten.mintKitten(dna, auth) in
+    let (storageLoc, _) = uniqueID(newGen) in
+    lockEntry(to,storageLoc,newAsset)
 }
 
 
-transactional transaction TransferKitten(consume kittenEntry:Entry[Locked[Asset[MandalaKitten.Kitten]]], pkFrom:EdDsa.Pk, pkTo:EdDsa.Pk, context consume ctx:Context, sigSender:EdDsa.Sig):
+transactional transaction TransferKitten(consume kittenEntry:Entry[Locked[Asset[MandalaKitten.Kitten]]], auth:AuthenticationToken, to:Subject, context consume gen:IdGenerator):
                                   (kittenSent:Entry[Locked[Asset[MandalaKitten.Kitten]]]) {
-  let auth = EdDsaIssuer.authenticateWith(pkFrom, sigSender) in
   let (senderLoc, kitten) = unlockEntry(kittenEntry, auth) in
-  let (receiverLoc, newCtx) = uniqueID(ctx) in
-  lockEntry(subjectFor(pkTo).subject,receiverLoc,kitten)
+  let (receiverLoc, newGen) = uniqueID(gen) in
+  lockEntry(to,receiverLoc,kitten)
 }

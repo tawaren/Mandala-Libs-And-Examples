@@ -23,7 +23,6 @@ module Either {
              | Right(_) => Bool#True
     }
 
-    //todo: this fails somehow Equal.eq can not be dropped
     global function eq[L,R](op1:Either[L,R], op2:Either[L,R], implicit consume eqLeft:Equal.eq, implicit consume eqRight:Equal.eq):Bool {
          inspect op1 with
              | Left(l1) => (inspect op2 with

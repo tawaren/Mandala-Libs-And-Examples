@@ -2,7 +2,8 @@ import core.IntU128.U128
 import core.IntU128._
 import core.Arith._
 import core.Compare._
-
+import core.Equal._
+import core.Equal
 
 module Token {
    global(inspect) local(create, consume) linear data Token[phantom T](amount:U128)
@@ -28,6 +29,12 @@ module Token {
         implement split with split[T]
         implement merge with merge[T]
         implement amount with amount[T]
+   }
+
+   global function tokenEq[T](tok1:Token[T], tok2:Token[T]) = tok1.amount == tok2.amount
+
+   instance EqForToken[T] for Equal[Token[T]]{
+        implement eq with tokenEq[T]
    }
 
 }

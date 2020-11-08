@@ -16,8 +16,8 @@ module Account {
     type AccountEntry = Entry[Account]
     global temporary linear data AuthInfo(accEntry:AccountEntry, token:AuthenticationToken)
 
-    global transactional function createAccount(owner:Subject, implicit consume ctx:Context):(acc:AccountEntry, newCtx:Context){
-        let (id, newCtx) = uniqueID(ctx) in (Entry#(id, Account#(owner)), newCtx)
+    global transactional function createAccount(owner:Subject, implicit consume gen:IdGenerator):(acc:AccountEntry, newGen:IdGenerator){
+        let (id, newGen) = uniqueID(gen) in (Entry#(id, Account#(owner)), newGen)
     }
 
     global function getOwner(accEntry:AccountEntry):Subject {
@@ -73,6 +73,9 @@ module Account {
     }
 
     //Todo: entry locks -- using a derive from a key / hashable
-
-
 }
+
+transactional transaction AccountAuthenticate(accEntry:Account.AccountEntry, token:AuthenticationToken):AuthenticationToken = Account.authenticateWith(accEntry,token)
+transactional transaction AccountSubject(accEntry:Account.AccountEntry):Subject = Account.subjectFor(accEntry).subject
+transactional transaction AccountCreate(owner:Subject, implicit context consume gen:IdGenerator):(acc:Account.AccountEntry, newGen:IdGenerator) = Account.createAccount(owner)
+transactional transaction AccountTransfer(consume accEntry:Account.AccountEntry, newOwner:Subject, auth:AuthenticationToken):Account.AccountEntry = Account.changeOwner(accEntry, newOwner, auth)

@@ -10,8 +10,8 @@ import core.sys.Ids._
 module Asset {
    global(inspect) local linear data Asset[T](id:Id.Private, assetData:T)
 
-   guarded[T] transactional function mint[T](consume assetData:T, implicit consume ctx:Context):(res:Asset[T], newCtx:Context){
-    let (id, newCtx) = uniqueID(ctx) in (Asset#(id, assetData), newCtx)
+   guarded[T] transactional function mint[T](consume assetData:T, implicit consume gen:IdGenerator):(res:Asset[T], newGen:IdGenerator){
+    let (id, newGen) = uniqueID(gen) in (Asset#(id, assetData), newGen)
    }
 
    //We return assetData, so that it we are not restricted to affine assetData

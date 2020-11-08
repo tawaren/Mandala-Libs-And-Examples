@@ -1,4 +1,5 @@
 import IntU64.U64
+import IntU8.U8
 import IntI64.I64
 import Data._
 import Ids._
@@ -9,22 +10,33 @@ system(12) module Sys {
    // Meaning the runtime can still persist it
    // in fact the runtime does ignore the persisted capability all together and only looks for tops
 
-   guarded[T] top temporary data Entry[persisted T](id:PrivateId,val:T)
+   guarded[T] temporary data Entry[persisted T](id:PrivateId,val:T)
 
-   local top temporary affine data Context(txtId:PrivateId, bundleHash:Data20, blockNo:U64, sectionNo:U8, txNo:U8, ctr:U64)
+   //Information about the current Transaction
+   local temporary data Context(bundleHash:Data20, blockNo:U64, sectionNo:U8, txNo:U8)
+   //A unique Id generator for the current Transaction
+   //Todo: shall we move to ids??
+   local temporary affine data IdGenerator(txtId:PrivateId, ctr:U64)
 
-   global function txtId(ctx:Context):(txtHash:PublicId) = privateToPublic(ctx.txtId)
    global function bundleHash(ctx:Context):(txtHash:Data20) = ctx.bundleHash
    global function blockNo(ctx:Context):(blockNo:U64) = ctx.blockNo
    global function sectionNo(ctx:Context):(sectionNo:U8) = ctx.sectionNo
    global function txNo(ctx:Context):(txNo:U8) = ctx.txNo
+   global function txtId(gen:IdGenerator):(txtHash:PublicId) = privateToPublic(gen.txtId)
 
    //Todo: can we make non transactional:
-   //      have unsave abort??
-   global transactional function uniqueID(consume ctx:Context):(id:PrivateId, ctxOut:Context) {
-     let (txtId, bundleHash, blockNo, sectionNo, txNo, ctr)@ctx in (
+   //      have & use unsave abort??
+   global transactional function uniqueID(consume gen:IdGenerator):(id:PrivateId, genOut:IdGenerator) {
+     let (txtId, ctr)@gen in (
        derivePrivateId8(txtId, IntU64.toData(ctr)),
-       Context#(txtId, bundleHash, blockNo, sectionNo, txNo, IntU64.add(ctr,1))
+       IdGenerator#(txtId, IntU64.add(ctr,1))
+     )
+   }
+
+   global transactional function subGenerator(consume gen:IdGenerator):(newGen:IdGenerator, genOut:IdGenerator) {
+     let (txtId, ctr)@gen in (
+       IdGenerator#(derivePrivateId8(txtId, IntU64.toData(ctr)), 0),
+       IdGenerator#(txtId, IntU64.add(ctr,1))
      )
    }
 }

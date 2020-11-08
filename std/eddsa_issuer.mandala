@@ -6,7 +6,10 @@ import SubjectManager._
 import Issuer
 import Option._
 
-module EdDsaIssuer {
+//Note: this is not really a system module
+//      but we need the hash on the local_server/wallet side to generate subjects
+//      and this is the easiest way to make this module recognizable without manually coping hashes around
+system(15) module EdDsaIssuer {
 
     global primitive data AuthInfo(pk:Pk, sig:Sig)
 
@@ -39,3 +42,6 @@ module EdDsaIssuer {
         implement authenticateWith with authenticateWith
     }
 }
+
+transactional transaction EdDsaAuthenticate(pk:Pk, sig:Sig, implicit context ctx:Context):AuthenticationToken = EdDsaIssuer.authenticateWith(pk,sig)
+transactional transaction EdDsaSubject(pk:Pk):Subject = EdDsaIssuer.subjectFor(pk).subject

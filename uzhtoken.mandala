@@ -16,7 +16,7 @@ module UzhToken {
 
     //Note: 0x0000000000000000000000000000000000000000000000000000000000000000 is a placeholder
     //Replace 0x00..00 with a Pk where you have access to the corresponding SK
-    global function ownerPk() = 0x0000000000000000000000000000000000000000000000000000000000000000:EdDsa.Pk
+    global function ownerPk() = 0xdf797acae07febf43fef6585f87c0529a9580330a8c97b621a0fcc7a4968558b:EdDsa.Pk
     global function ownerSubject() = subjectFor(ownerPk()).subject
 
     global transactional function mintUZH(amount:U128, auth:AuthenticationToken):Token[UZH] {
@@ -33,21 +33,19 @@ module UzhToken {
 
 }
 
-transactional transaction MintUZH(amount:U128, to:EdDsa.Pk, context consume ctx:Context, sigMinter:EdDsa.Sig):(coins:Entry[Locked[Token[UzhToken.UZH]]]) {
-    let auth = EdDsaIssuer.authenticateWith(UzhToken.ownerPk(), sigMinter) in
+transactional transaction MintUZH(amount:U128, auth:AuthenticationToken, context consume gen:IdGenerator):(coins:Entry[Locked[Token[UzhToken.UZH]]]) {
     let newTokens = UzhToken.mintUZH(amount, auth) in
-    let (storageLoc, _) = uniqueID(ctx) in
-    lockEntry(subjectFor(to).subject,storageLoc,newTokens)
+    let (storageLoc, _) = uniqueID(gen) in
+    lockEntry(auth.subject,storageLoc,newTokens)
 }
 
 
-transactional transaction TransferUZH(consume coins:Entry[Locked[Token[UzhToken.UZH]]], pkFrom:EdDsa.Pk, amount:U128, pkTo:EdDsa.Pk, context consume ctx:Context, sigSender:EdDsa.Sig):
+transactional transaction TransferUZH(consume coins:Entry[Locked[Token[UzhToken.UZH]]], auth:AuthenticationToken, amount:U128, to:Subject, context consume gen:IdGenerator):
                                   (coinsChange:Entry[Locked[Token[UzhToken.UZH]]], coinsSent:Entry[Locked[Token[UzhToken.UZH]]]) {
-  let auth = EdDsaIssuer.authenticateWith( pkFrom, sigSender) in
   let (senderLoc, allTokens) = unlockEntry(coins, auth) in
   let (rem,send) = split(allTokens, amount) in
-  let (receiverLoc, _) = uniqueID(ctx) in
-  let changeEntry = lockEntry(subjectFor(pkFrom).subject,senderLoc,rem) in
-  let receiverEntry = lockEntry(subjectFor(pkTo).subject,receiverLoc,send) in
+  let (receiverLoc, _) = uniqueID(gen) in
+  let changeEntry = lockEntry(auth.subject,senderLoc,rem) in
+  let receiverEntry = lockEntry(to,receiverLoc,send) in
   (changeEntry, receiverEntry)
 }
