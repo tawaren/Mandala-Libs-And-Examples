@@ -3,46 +3,32 @@ import Data._
 
 system(11) module Ids {
     local external(20) standard data PrivateId
-    type PublicId = project(PrivateId)
+    local standard data PrivateModuleId(id:PrivateId)
+    type Id = project(PrivateId)
+    type ModuleId = project(PrivateModuleId)
 
-    global(consume,inspect) local(create) temporary data Auth[T](sender:PublicId, val:T)
+    global external function moduleId():PrivateModuleId
 
-    global external function moduleId():(priv:PrivateId)
+    global external function idFromData(dat:Data20):Id
+    global external function idToData(id:Id):Data20
+    global external function moduleIdFromData(dat:Data20):ModuleId
+    global external function moduleIdToData(id:ModuleId):Data20
 
-    global external function privateToPublic(priv:PrivateId):(pub:PublicId)
-    global external function dataToPublic(dat:Data20):(pub:PublicId)
-    global external function privateToData(priv:PrivateId):(dat:Data20)
-    global external function publicToData(pub:PublicId):(dat:Data20)
+    global external function eqId(id1:Id, id2:Id):Bool
+    global external function eqModuleId(id1:ModuleId, id2:ModuleId):Bool
 
-    global external function eqPub(pub1:PublicId, pub2:PublicId):(res:Bool)
-    global external function eqPriv(priv1:PrivateId, priv2:PrivateId):(res:Bool)
+    global external function privateIdDerive(priv:PrivateId, hash:Hash):PrivateId
+    global external function idDerive(id:Id, hash:Hash):Id
+    global external function privateModuleIdDerive(priv:PrivateModuleId, hash:Hash):PrivateId
+    global external function moduleIdDerive(id:ModuleId, hash:Hash):Id
 
-    global external function authenticatedMessage[T](val:T):(auth:Auth[T])
+    global function idFromPrivate(priv:PrivateId):Id = project(priv)
+    global function moduleIdFromPrivate(priv:PrivateModuleId):ModuleId = project(priv)
 
-    global external function derivePrivateIdPrivate(priv1:PrivateId, priv2:PrivateId):(priv:PrivateId)
-    global external function derivePrivateIdPublic(priv:PrivateId, pub:PublicId):(priv:PrivateId)
-    global external function derivePrivateId1(priv:PrivateId, dat:Data1):(priv:PrivateId)
-    global external function derivePrivateId2(priv:PrivateId, dat:Data2):(priv:PrivateId)
-    global external function derivePrivateId4(priv:PrivateId, dat:Data4):(priv:PrivateId)
-    global external function derivePrivateId8(priv:PrivateId, dat:Data8):(priv:PrivateId)
-    global external function derivePrivateId12(priv:PrivateId, dat:Data12):(priv:PrivateId)
-    global external function derivePrivateId16(priv:PrivateId, dat:Data16):(priv:PrivateId)
-    global external function derivePrivateId20(priv:PrivateId, dat:Data20):(priv:PrivateId)
-    global external function derivePrivateId24(priv:PrivateId, dat:Data24):(priv:PrivateId)
-    global external function derivePrivateId28(priv:PrivateId, dat:Data28):(priv:PrivateId)
-    global external function derivePrivateId32(priv:PrivateId, dat:Data32):(priv:PrivateId)
+    global function privateIdToData(priv:PrivateId):Data20 = idToData(project(priv))
+    global function privateModuleIdToData(priv:PrivateModuleId):Data20 = idToData(project(priv.id))
 
-    global external function derivePublicIdPrivate(pub:PublicId, priv2:PrivateId):(pub:PublicId)
-    global external function derivePublicIdPublic(pub1:PublicId, pub2:PublicId):(pub:PublicId)
-    global external function derivePublicId1(pub:PublicId, dat:Data1):(pub:PublicId)
-    global external function derivePublicId2(pub:PublicId, dat:Data2):(pub:PublicId)
-    global external function derivePublicId4(pub:PublicId, dat:Data4):(pub:PublicId)
-    global external function derivePublicId8(pub:PublicId, dat:Data8):(pub:PublicId)
-    global external function derivePublicId12(pub:PublicId, dat:Data12):(pub:PublicId)
-    global external function derivePublicId16(pub:PublicId, dat:Data16):(pub:PublicId)
-    global external function derivePublicId20(pub:PublicId, dat:Data20):(pub:PublicId)
-    global external function derivePublicId24(pub:PublicId, dat:Data24):(pub:PublicId)
-    global external function derivePublicId28(pub:PublicId, dat:Data28):(pub:PublicId)
-    global external function derivePublicId32(pub:PublicId, dat:Data32):(pub:PublicId)
-
+    global function eqPrivateId(id1:PrivateId, id2:PrivateId):Bool = eqId(project(id1), project(id2))
+    global function eqPrivateModuleId(id1:PrivateModuleId, id2:PrivateModuleId):Bool= eqModuleId(project(id1), project(id2))
 }
+

@@ -1,7 +1,6 @@
 import core.sys.Sys._
 import core.Id
-//Todo: Can we wrap and add into transformClass???
-import core.sys.Ids._
+
 
 //Assets have some tricks up there sleeves
 // As each asset gets an Private Id they also have a subject over IdIssuer
@@ -15,7 +14,7 @@ module Asset {
    }
 
    //We return assetData, so that it we are not restricted to affine assetData
-   guarded[T] function burn[T](consume ass1:Asset[T]):T = let (id, assetData)@ass1 in assetData
+   guarded[T] function burn[T](consume ass1:Asset[T]):T = let Asset(id, assetData) = ass1 in assetData
 
    global function getId[T](ass1:Asset[T]):Id.Private = ass1.id
    global function getData[relevant T](ass1:Asset[T]):T = ass1.assetData

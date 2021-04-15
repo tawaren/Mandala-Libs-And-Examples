@@ -9,21 +9,18 @@ module Token {
    global(inspect) local(create, consume) linear data Token[phantom T](amount:U128)
 
    guarded[T] function mint[T](amount:U128):(res:Token[T]) = Token#(amount)
-   guarded[T] function burn[T](consume tok1:Token[T]) = let (amount)@tok1 in ()
+   guarded[T] function burn[T](consume tok1:Token[T]) = let Token(amount) = tok1 in ()
 
    global transactional function split[T](consume tok:Token[T], split:U128):(reminder:Token[T], extracted:Token[T]){
-        match tok.amount >= split with
-         | True => (Token#(tok.amount - split), Token#(split))
-         | False => rollback(tok)
+        ensure tok.amount >= split in
+        (Token#(tok.amount - split), Token#(split))
    }
 
    global transactional function merge[T](consume tok1:Token[T], consume tok2:Token[T]):(res:Token[T]) {
         Token#(tok1.amount + tok2.amount)
    }
 
-   global function amount[T](tok:Token[T]):(amount:U128){
-        inspect tok with Token(amount) => amount
-   }
+   global function amount[T](Token[T](amount)) = amount
 
    instance FungibleForToken[T] for Fungible[Token[T]]{
         implement split with split[T]

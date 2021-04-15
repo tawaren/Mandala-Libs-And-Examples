@@ -1,3 +1,0 @@
-class Derive[T,V] {
-   guarded[T](define) function derive(prim:T, sec:V):T
-}

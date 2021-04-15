@@ -12,6 +12,8 @@ system(10) module Data {
     global external(28) primitive data Data28
     global external(32) primitive data Data32
 
+    type Hash = Data20
+
     global external function eq1(data1:Data1, data2:Data1):(res:Bool)
     global external function eq2(data1:Data2, data2:Data2):(res:Bool)
     global external function eq4(data1:Data4, data2:Data4):(res:Bool)
@@ -25,14 +27,14 @@ system(10) module Data {
 
     global external function joinHash(data1:Data20, data2:Data20):(res:Data20)
 
-    global external function hash1(data1:Data1):(res:Data20)
-    global external function hash2(data1:Data2):(res:Data20)
-    global external function hash4(data1:Data4):(res:Data20)
-    global external function hash8(data1:Data8):(res:Data20)
-    global external function hash12(data1:Data12):(res:Data20)
-    global external function hash16(data1:Data16):(res:Data20)
-    global external function hash20(data1:Data20):(res:Data20)
-    global external function hash24(data1:Data24):(res:Data20)
-    global external function hash28(data1:Data28):(res:Data20)
-    global external function hash32(data1:Data32):(res:Data20)
+    global external function hash1(data1:Data1):Hash
+    global external function hash2(data1:Data2):Hash
+    global external function hash4(data1:Data4):Hash
+    global external function hash8(data1:Data8):Hash
+    global external function hash12(data1:Data12):Hash
+    global external function hash16(data1:Data16):Hash
+    global external function hash20(data1:Data20):Hash
+    global external function hash24(data1:Data24):Hash
+    global external function hash28(data1:Data28):Hash
+    global external function hash32(data1:Data32):Hash
 }

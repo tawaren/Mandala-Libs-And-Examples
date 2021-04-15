@@ -6,9 +6,9 @@ system module Bool {
     type Bool = sys.Bool.Bool
 
     global function hash(op1:Bool):Data.Data20 {
-         match op1 with
-             | False => IntU8.hash(0)
-             | True => IntU8.hash(1)
+         if op1
+          then IntU8.hash(1)
+          else IntU8.hash(0)
     }
 
     global function joinHash(op1:Bool, op2:Bool):Data.Data20 = Data.joinHash(hash(op1), hash(op2))

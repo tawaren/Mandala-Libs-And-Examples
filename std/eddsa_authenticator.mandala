@@ -1,0 +1,32 @@
+import core.Id._
+import core.sys.Ids.moduleId
+import core.sys.EdDsa._
+import core.sys.Sys.Context
+import Subject._
+import Option._
+import PermAssociation._
+
+//Note: this is not really a system module
+//      but we need the hash on the local_server/wallet side to generate subjects
+//      and this is the easiest way to make this module recognizable without manually coping hashes around
+system(15) module EdDsaAuthenticator {
+
+    global function subjectFor(pk:Pk):ValidatedSubject {
+        validateSubject(moduleId(),derivePublicId(pk))
+    }
+
+    global transactional function authenticateWith(pk:Pk, sig:Sig, implicit ctx:Context):(auth:AuthorizationCap) {
+         ensure verifyTx(ctx, pk, sig) in
+         authenticate(moduleId(),derivePublicId(pk))
+    }
+
+    global function safeAuthenticateWith(pk:Pk, sig:Sig, implicit context ctx:Context):(auth:Option[AuthorizationCap]) {
+         try authenticateWith(pk, sig) with
+          | success(token) => Option#Some(token)
+          | failure => Option#None
+    }
+}
+
+transactional transaction AuthorizationFromEdDsa(pk:Pk, sig:Sig, implicit context ctx:Context):Authorization = perm(EdDsaAuthenticator.authenticateWith(pk,sig))
+transactional transaction AuthorizationCapFromEdDsa(pk:Pk, sig:Sig, implicit context ctx:Context):AuthorizationCap = EdDsaAuthenticator.authenticateWith(pk,sig)
+transactional transaction SubjectFromEdDsa(pk:Pk):Subject = EdDsaAuthenticator.subjectFor(pk).subject

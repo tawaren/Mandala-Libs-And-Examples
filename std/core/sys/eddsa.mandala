@@ -8,7 +8,7 @@ system(13) module EdDsa {
     global external(32) primitive data Pk
     global external(64) primitive data Sig
 
-    global external function derivePublicId(pk:Pk):(pub:PublicId)
+    global external function derivePublicId(pk:Pk):Id
    
     global external function verify1(msg:Data1, pk:Pk, sig:Sig):(res:Bool)
     global external function verify2(msg:Data2, pk:Pk, sig:Sig):(res:Bool)

@@ -5,110 +5,25 @@ import sys.Unsafe
 
 system module Id {
 
-    type Public = Ids.PublicId
+    //just delegates
+    type Public = Ids.Id
     type Private = Ids.PrivateId
+    type PrivateModule = Ids.PrivateModuleId
+    type PublicModule = Ids.ModuleId
 
     instance EqForPublicId for Equal[Public]{
-        implement eq with Ids.eqPub
+        implement eq with Ids.eqId
     }
 
     instance EqForPrivateId for Equal[Private]{
-        implement eq with Ids.eqPriv
-    }
-    
-    instance DeriveForPrivatePrivate for Derive[Private,Private] {
-        implement derive with Ids.derivePrivateIdPrivate
+        implement eq with Ids.eqPrivateId
     }
 
-    instance DeriveForPrivatePublic for Derive[Private,Public] {
-        implement derive with Ids.derivePrivateIdPublic
-    }    
-
-    instance DeriveForPrivateData1 for Derive[Private,Data1] {
-        implement derive with Ids.derivePrivateId1
-    }  
-
-    instance DeriveForPrivateData2 for Derive[Private,Data2] {
-        implement derive with Ids.derivePrivateId2
-    }      
-
-    instance DeriveForPrivateData4 for Derive[Private,Data4] {
-        implement derive with Ids.derivePrivateId4
-    } 
-
-    instance DeriveForPrivateData8 for Derive[Private,Data8] {
-        implement derive with Ids.derivePrivateId8
-    } 
-
-    instance DeriveForPrivateData12 for Derive[Private,Data12] {
-        implement derive with Ids.derivePrivateId12
-    } 
-
-    instance DeriveForPrivateData16 for Derive[Private,Data16] {
-        implement derive with Ids.derivePrivateId16
-    } 
-
-    instance DeriveForPrivateData20 for Derive[Private,Data20] {
-        implement derive with Ids.derivePrivateId20
-    } 
-
-    instance DeriveForPrivateData24 for Derive[Private,Data24] {
-        implement derive with Ids.derivePrivateId24
-    } 
-
-    instance DeriveForPrivateData28 for Derive[Private,Data28] {
-        implement derive with Ids.derivePrivateId28
-    } 
-    
-    instance DeriveForPrivateData32 for Derive[Private,Data32] {
-        implement derive with Ids.derivePrivateId32
-    } 
-
-    instance DeriveForPublicPrivate for Derive[Public,Private] {
-        implement derive with Ids.derivePublicIdPrivate
+    instance EqForPublicModuleId for Equal[PublicModule]{
+        implement eq with Ids.eqModuleId
     }
 
-    instance DeriveForPublicPublic for Derive[Public,Public] {
-        implement derive with Ids.derivePublicIdPublic
-    }    
-
-    instance DeriveForPublicData1 for Derive[Public,Data1] {
-        implement derive with Ids.derivePublicId1
-    }  
-
-    instance DeriveForPublicData2 for Derive[Public,Data2] {
-        implement derive with Ids.derivePublicId2
-    }      
-
-    instance DeriveForPublicData4 for Derive[Public,Data4] {
-        implement derive with Ids.derivePublicId4
-    } 
-
-    instance DeriveForPublicData8 for Derive[Public,Data8] {
-        implement derive with Ids.derivePublicId8
-    } 
-
-    instance DeriveForPublicData12 for Derive[Public,Data12] {
-        implement derive with Ids.derivePublicId12
-    } 
-
-    instance DeriveForPublicData16 for Derive[Public,Data16] {
-        implement derive with Ids.derivePublicId16
-    } 
-
-    instance DeriveForPublicData20 for Derive[Public,Data20] {
-        implement derive with Ids.derivePublicId20
-    } 
-
-    instance DeriveForPublicData24 for Derive[Public,Data24] {
-        implement derive with Ids.derivePublicId24
-    } 
-
-    instance DeriveForPublicData28 for Derive[Public,Data28] {
-        implement derive with Ids.derivePublicId28
-    } 
-    
-    instance DeriveForPublicData32 for Derive[Public,Data32] {
-        implement derive with Ids.derivePublicId32
+    instance EqForPrivateModuleId for Equal[PrivateModule]{
+        implement eq with Ids.eqPrivateModuleId
     }
 }
