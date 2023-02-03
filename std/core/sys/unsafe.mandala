@@ -5,7 +5,7 @@ system(14) module Unsafe {
     local external function _unProject[T](t:project(T)):(res:T)
     local external function _packUnsafe[T](t:T):(res:Unsafe[T])
     local external function _unpackUnsafe[T](t:Unsafe[T]):(res:T)
-    //Todo: add a special copyVoitaile -- can copy Sigs Non-Values --Is marked as ExtraDangerous -- as it can trick ressource costs
+    //Todo: add a special copyVoitaile -- can copy Sigs Non-Values --Is marked as ExtraDangerous -- as it can trick resource costs
     local external function _copy[T](t:T):(res:T)
     local external function _consume[T](consume t:T):()
 

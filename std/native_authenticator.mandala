@@ -6,6 +6,8 @@ import core.sys.Sys.Sender
 import Subject._
 import Option._
 import PermAssociation._
+import Permission._
+
 
 module NativeAuthenticator {
 

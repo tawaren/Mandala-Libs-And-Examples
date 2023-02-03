@@ -1,6 +1,6 @@
-import sys.Data.Data20
+import sys.Data.Hash
 
 class Hash[T] {
-   guarded[T](define) function hash(op:T):Data20
-   guarded[T](define) function joinHash(op1:T, op2:T):Data20
+   guarded[T](define) function hash(op:T):Hash
+   guarded[T](define) function joinHash(op1:T, op2:T):Hash
 }

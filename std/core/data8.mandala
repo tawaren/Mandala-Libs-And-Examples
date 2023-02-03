@@ -5,7 +5,7 @@ system module Data8 {
 
     type Data8 = Data.Data8
 
-    global function joinHash(op1:Data8, op2:Data8):Data.Data20 = Data.joinHash(Data.hash8(op1), Data.hash8(op2))
+    global function joinHash(op1:Data8, op2:Data8):Data.Hash = Data.joinHash(Data.hash8(op1), Data.hash8(op2))
 
     instance HashForData8 for Hash[Data8]{
         implement hash with Data.hash8

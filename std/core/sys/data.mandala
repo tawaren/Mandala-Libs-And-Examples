@@ -25,7 +25,7 @@ system(10) module Data {
     global external function eq28(data1:Data28, data2:Data28):(res:Bool)
     global external function eq32(data1:Data32, data2:Data32):(res:Bool)
 
-    global external function joinHash(data1:Data20, data2:Data20):(res:Data20)
+    global external function joinHash(data1:Hash, data2:Hash):(res:Hash)
 
     global external function hash1(data1:Data1):Hash
     global external function hash2(data1:Data2):Hash
